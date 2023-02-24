@@ -2,7 +2,7 @@
 
 - [x] STL / Containers 
 - [x] Smart Pointers
-- [ ] Lambda Functions (functors)
+- [x] Lambda Functions (functors)
 - [ ] Multithreading
 - [ ] Memory management, memory leaks, smart pointers: https://hackingcpp.com/cpp/lang/manual_memory_management.html 
 - [ ] Segmentation faults 
@@ -12,6 +12,7 @@
 - [ ] c++17: https://en.cppreference.com/w/cpp/17
 - [ ] c++20: https://en.cppreference.com/w/cpp/20
 - [ ] c++23: https://en.cppreference.com/w/cpp/23
+-------------
 
 ## **Containers (STL)** ##
 
@@ -143,6 +144,8 @@ Associative containers can be more efficient in operations like insertion, delet
   - insertion, deletion and removal at constant complexity at best case and linear complexity in worst case scenarios
   - composed of pairs of values/objects (key-value pairs)
 
+-------------
+
 ## **Smart Pointers** ##
 
 Raw pointers (conventional ones) are simple variables that store the address of another variable. This means they are just a "memory position" with not much other features. Raw pointers can be used to allocate memory dynamically but, in C++, dynamic memory needs to be freed "manually" by the programmer. The problem, here, is: 
@@ -183,3 +186,72 @@ Basically, smart pointers can manage memory (de)allocation by themselves. That m
 - When we have ciclical referencing, we should use ``weak_ptr``.
 - When we need to create a cache, we could use ``shared_ptr`` (i.e. to avoid going to a database / file everytime we need to retreive persistent data to memory) - in conjunction with ``weak_ptr`` to prevent cache in maintaning unused references in memory (``static shared_ptr`` cache does would do so - therefore, use ``weak_ptr``). It is a Flyweight like design pattern.
 - Design patterns like Flyweight and Observer could use ``weak_ptr`` to implement it.
+
+-------------
+
+### **Functors: Function Objects & Lambda Functions** ###
+
+Function Classes are those who provide at least one overloaded member function of the operator() - the call operator or application operator. Objects instantiated from that Class can be, then, used as functions, since they have the overloaded operator(). They have two main advantages conventional functions. First, since they are a type (class), they can be passed as argument in templates parameters. Second, these functors can also be stateful, that means, that they can have member variables and these variables can be updated at runtime. Since some standard algorithims doesn't garantee the evaluation order of the arguments passed as parameters to function objects, it is possible that state inconsistencies may happen. This is especially true for some c++17 parallel versions of those algorithms. Basically, member variables should not be used both for computing the return result as well as changing this variable state whenever operator() is called.
+  
+1) Good practice: calls to operator() in sequence need to be independent, one from another;
+2) Good practice: onde may want to garantee that operator() is const, so it can't update function object's state
+    - if one needs operator() to be non-const and use it within some of the standard algorithim (that may be parallel), it might be intelligent to garantee that concurrency won't affect the results (i.e. access to shared streams needs to be made carefully). 
+
+They are often used as means of "costumizing behavior" in other function objects or algorithims (``<algorithim>`` header) data structures (standard containers). Some of the standard function objects, since c++11 defined in the ``<functional>`` header, are:
+
+- **Comparisions**
+  - ``std::equal_to<T>``
+  - ``std::no_equal_to<T>``
+  - ``std::greater<T>``
+  - ``std::less<T>``
+  - ``std::greater_equal<T>``
+  - ``std::less_equal<T>``
+- **Arithmetic**
+  - ``std::plus<T>``
+  - ``std::minus<T>``
+  - ``std::multiplies<T>``
+  - ``std::divides<T>``
+  - ``std::modulus<T>``
+  - ``std::negate<T>``
+- **Logical and bitwise operations**
+  - ``std::logical_and<T>``
+  - ``std::logical_or<T>``
+  - ``std::logical_not<T>``
+  - ``std::bit_and<T>``
+  - ``std::bit_or<T>``
+  - ``std::bit_xor<T>``
+  - ``std::bit_not<T>``
+- **Hash**
+  - ``std::hash<Arithmetic>``
+  - ``std::hash<Enumeration>``
+  - ``std::hash<T*>``
+- Obs.: since c++14, it is not necessary to define the type T, since it can infer types automatically.
+
+#### **Lambda Functions** ####
+
+Lambda Functions are a special kind of function objects created at compilation time. It allows us to define custom anonymous functions, also known as closures, whose memory address is known only to compiler. They're syntax are a little bit different from what we are used to. Instead of the name of the function, we place the square brackets. Those square brackets allows us to specigy in which way we might "capture" variables that are in the same sorrounding scope of the function (it is called capture clause, also lambda-introducer). We might capture them by value ``[=]`` or by reference ``[&]``, or a combination of both (these captured variables act, lets say, as kind of member variables to our function objects/lambda functions).
+
+ - When captured by value, original variable (outside the function, but in the same sorrounding  scope) will be copied into the function and, therefore, can't be altered by the function outside its own inner scope; the other way, by reference, the captured variable can be altered inside the function's sorrounding scope whereas will alter the original variable outside the functions inner scope.
+
+The overall lambda function syntax is as follows:
+
+``[<capture>] (<params>) <specs> -> <return_type> {<body>} ``
+
+where:
+
+- ``<capture>`` is where we define the sorrounding scope variables will be captured (by value or reference); we can also define new variables here (generalized capture c++14); it can also be empty, meaning no variable is being captured; it is also possible to define a default capture mode, and also the exceptional "opposite" capture mode;
+- ``<params>`` is the optional list of parameters just like normal functions;
+- ``<specs>`` is the optional specifications of the function (like mutable, exceptions/throw, etc);
+- ``<return_type>`` is the optional explicit return type (also known as trailing-return-type);
+- ``<body>`` contains the execution logic of the function.
+
+Whenever we want to "name" the lambda function, we can use syntax like: `` auto name = [...] (...) {...} ``
+
+Since c++14 we can also "define" new variables into the capture clause. This acts as a mean to introduce new "member variables" to the lambda function. The initialization of the variables can be made as any arbitrary expression. It is usefull to capture "move-only variables" (like unique_ptr) from the sorrounding scope into the lambda function's inner scope.
+
+##### **Good references**: ##### 
+  1) https://hackingcpp.com/cpp/design/function_objects.html
+  2) https://learn.microsoft.com/en-us/cpp/standard-library/function-objects-in-the-stl?view=msvc-170
+  3) https://www.geeksforgeeks.org/functors-in-cpp/
+  4) https://learn.microsoft.com/en-us/cpp/cpp/lambda-expressions-in-cpp
+  5) https://hackingcpp.com/cpp/lang/lambda_basics.html
