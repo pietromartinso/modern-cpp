@@ -7,6 +7,8 @@
 - [ ] Memory management, memory leaks, smart pointers: https://hackingcpp.com/cpp/lang/manual_memory_management.html 
 - [ ] Segmentation faults 
 - [ ] Debugging
+- [ ] Static code analysis: https://learn.microsoft.com/en-us/cpp/code-quality/code-analysis-for-c-cpp-overview?view=msvc-170
+- [ ] Unit testing: https://learn.microsoft.com/en-us/visualstudio/test/writing-unit-tests-for-c-cpp?view=vs-2022
 - [ ] c++11: https://en.cppreference.com/w/cpp/11
 - [ ] c++14: https://en.cppreference.com/w/cpp/14
 - [ ] c++17: https://en.cppreference.com/w/cpp/17
